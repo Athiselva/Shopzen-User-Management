@@ -11,7 +11,7 @@ COPY . /app
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Expose port 5000 for the Flask app to listen on
-EXPOSE 5000
+EXPOSE 8082
 
 # Run the Flask app
 CMD ["python", "user_management.py"]
