@@ -3,6 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
+import bcrypt
 
 # Load environment variables from .env file
 load_dotenv()
@@ -36,9 +37,13 @@ class User(db.Model):
         self.address = address
         self.is_admin = is_admin
         self.username = username
-        self.password = password
+        # Hash the password before saving it to the database
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.created_by = created_by
         self.modified_by = modified_by
+
+    def decode_password(self):
+        return self.password.decode('utf-8')
 
 # Create the database schema
 db.create_all()
@@ -61,7 +66,7 @@ class UserResource(Resource):
                 'address': user.address,
                 'is_admin': user.is_admin,
                 'username': user.username,
-                'password': user.password,
+                'password': user.decode_password(),  # Decode the password
                 'created_at': user.created_at,
                 'created_by': user.created_by,
                 'modified_at': user.modified_at,
@@ -77,7 +82,8 @@ class UserResource(Resource):
             if args['username']:
                 user.username = args['username']
             if args['password']:
-                user.password = args['password']
+                 # Hash the new password before updating
+                user.password = bcrypt.hashpw(args['password'].encode('utf-8'), bcrypt.gensalt())
             db.session.commit()
             return {'message': 'Username and/or password updated successfully'}
         return {'message': 'User not found'}, 404
@@ -104,7 +110,7 @@ class UsersResource(Resource):
                 'address': user.address,
                 'is_admin': user.is_admin,
                 'username': user.username,
-                'password': user.password,
+                'password': user.decode_password(),  # Decode the password
                 'created_at': user.created_at,
                 'created_by': user.created_by,
                 'modified_at': user.modified_at,
@@ -116,6 +122,7 @@ class UsersResource(Resource):
     def post(self):
         args = request.get_json()
         user = User(**args)
+        user.password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
         db.session.add(user)
         db.session.commit()
         return {'message': 'User created successfully'}, 201
