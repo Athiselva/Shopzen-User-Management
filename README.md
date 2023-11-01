@@ -1,5 +1,5 @@
 
-# Python - User Management API
+# Python - Shopzen User Management API
 
 This is a Flask-based RESTful API for managing user information with added security features for password hashing. The API provides endpoints for creating users, updating user information, fetching user details by ID, and fetching a list of all users. User passwords are securely hashed using the `bcrypt` library for enhanced security.
 
